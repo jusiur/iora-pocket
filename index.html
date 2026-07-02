@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IORA Pocket</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            padding: 16px;
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-top: 10px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #3b82f6, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Status Bar Card */
+        .status-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        .dot.offline {
+            background-color: #f59e0b;
+            box-shadow: 0 0 10px #f59e0b;
+        }
+
+        /* Tab Switchers */
+        .tabs {
+            display: flex;
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent);
+            color: white;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Form Card */
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            transition: transform 0.1s ease, opacity 0.2s ease;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        /* Events Queue Section */
+        .queue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .queue-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .badge {
+            background-color: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .queue-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .event-item {
+            background-color: rgba(30, 41, 59, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .event-details h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .event-details p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .btn-sync {
+            background: linear-gradient(135deg, #10b981, #059669);
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">I</div>
+            <h1>IORA Pocket</h1>
+        </div>
+        <p class="subtitle">Buzón de Eventos Offline</p>
+    </header>
+
+    <!-- Conexión y Estado -->
+    <div class="status-card">
+        <div class="status-indicator">
+            <div class="dot offline" id="status-dot"></div>
+            <span id="status-text">Modo Local Offline 🟡</span>
+        </div>
+        <button id="btn-drive-toggle" class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 0.8rem; margin: 0; box-shadow: none;">
+            Vincular Drive
+        </button>
+    </div>
+
+    <!-- Navegación de Formularios -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('paciente')">Registrar Paciente</button>
+        <button class="tab-btn" onclick="switchTab('transaccion')">Contabilidad</button>
+    </div>
+
+    <!-- Formulario Paciente -->
+    <div id="form-paciente" class="card">
+        <form onsubmit="savePatient(event)">
+            <div class="form-group">
+                <label>Documento de Identidad</label>
+                <input type="text" id="p-doc" required placeholder="Ej: 10203040">
+            </div>
+            <div class="form-group">
+                <label>Nombres</label>
+                <input type="text" id="p-nombres" required placeholder="Ej: Carlos Andrés">
+            </div>
+            <div class="form-group">
+                <label>Apellidos</label>
+                <input type="text" id="p-apellidos" required placeholder="Ej: Pérez Gómez">
+            </div>
+            <div class="form-group">
+                <label>Celular / Teléfono</label>
+                <input type="tel" id="p-tel" placeholder="Ej: 3001234567">
+            </div>
+            <button type="submit" class="btn-primary">Guardar Paciente</button>
+        </form>
+    </div>
+
+    <!-- Formulario Transacción -->
+    <div id="form-transaccion" class="card" style="display: none;">
+        <form onsubmit="saveTransaction(event)">
+            <div class="form-group">
+                <label>Tipo de Transacción</label>
+                <select id="t-tipo">
+                    <option value="Ingreso">Ingreso (+)</option>
+                    <option value="Egreso">Egreso (-)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Cliente / Proveedor</label>
+                <input type="text" id="t-cliente" required placeholder="Ej: Juan Gómez / Dental Express">
+            </div>
+            <div class="form-group">
+                <label>Concepto / Detalle</label>
+                <input type="text" id="t-concepto" required placeholder="Ej: Diseño de sonrisa / Compra resinas">
+            </div>
+            <div class="form-group">
+                <label>Valor ($ COP)</label>
+                <input type="number" id="t-monto" required placeholder="Ej: 150000">
+            </div>
+            <button type="submit" class="btn-primary">Guardar Transacción</button>
+        </form>
+    </div>
+
+    <!-- Cola de Eventos Pendientes -->
+    <div class="queue-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="queue-title">Eventos Pendientes</span>
+            <span class="badge" id="queue-badge">0</span>
+        </div>
+        <button onclick="clearAllEvents()" class="btn-delete" style="color: var(--text-muted)">Limpiar todo</button>
+    </div>
+
+    <div class="queue-list" id="queue-list">
+        <!-- Render dinámico -->
+    </div>
+
+    <button onclick="syncWithDrive()" class="btn-primary btn-sync" id="btn-sync-action" style="display: none;">
+        Sincronizar a Google Drive ahora
+    </button>
+
+    <script>
+        let eventsQueue = JSON.parse(localStorage.getItem('iora_events_queue') || '[]');
+        
+        // CONFIGURACIÓN DE GOOGLE API
+        const CLIENT_ID = '783259858000-b7ec4d40r8v5g3qaqqcfoi96omcefdr3.apps.googleusercontent.com';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+        let tokenClient;
+        let accessToken = localStorage.getItem('google_access_token') || null;
+        let driveLinked = !!accessToken;
+
+        // Cargar librería de Google Identity
+        function loadGoogleApis() {
+            const scriptGsi = document.createElement('script');
+            scriptGsi.src = 'https://accounts.google.com/gsi/client';
+            scriptGsi.onload = initGsiClient;
+            document.body.appendChild(scriptGsi);
+        }
+
+        function initGsiClient() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: (tokenResponse) => {
+                    if (tokenResponse.error !== undefined) {
+                        console.error(tokenResponse);
+                        return;
+                    }
+                    accessToken = tokenResponse.access_token;
+                    localStorage.setItem('google_access_token', accessToken);
+                    driveLinked = true;
+                    updateUI();
+                    syncWithDrive();
+                },
+            });
+            updateUI();
+        }
+
+        window.onload = loadGoogleApis;
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (tab === 'paciente') {
+                document.getElementById('form-paciente').style.display = 'block';
+                document.getElementById('form-transaccion').style.display = 'none';
+            } else {
+                document.getElementById('form-paciente').style.display = 'none';
+                document.getElementById('form-transaccion').style.display = 'block';
+            }
+        }
+
+        function updateUI() {
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            const btnLink = document.getElementById('btn-drive-toggle');
+            const btnSync = document.getElementById('btn-sync-action');
+
+            if (driveLinked) {
+                dot.className = "dot";
+                text.innerText = "Drive Conectado 🟢";
+                btnLink.innerText = "Desvincular";
+                btnLink.style.background = "var(--danger)";
+            } else {
+                dot.className = "dot offline";
+                text.innerText = "Modo Local Offline 🟡";
+                btnLink.innerText = "Vincular Drive";
+                btnLink.style.background = "var(--accent)";
+            }
+
+            const list = document.getElementById('queue-list');
+            const badge = document.getElementById('queue-badge');
+            badge.innerText = eventsQueue.length;
+            list.innerHTML = '';
+
+            if (eventsQueue.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 20px;">No hay eventos en cola</p>';
+                btnSync.style.display = 'none';
+            } else {
+                btnSync.style.display = 'block';
+                eventsQueue.forEach((evt, idx) => {
+                    const item = document.createElement('div');
+                    item.className = 'event-item';
+                    
+                    let title = evt.action === 'CREATE_PATIENT' ? 'Nuevo Paciente' : 'Nueva Transacción';
+                    let desc = evt.action === 'CREATE_PATIENT' 
+                        ? `${evt.data.Nombres} ${evt.data.Apellidos} (${evt.data.Documento})`
+                        : `${evt.data.tipo}: $${evt.data.monto.toLocaleString()} - ${evt.data.cliente_proveedor}`;
+
+                    item.innerHTML = `
+                        <div class="event-details">
+                            <h4>${title}</h4>
+                            <p>${desc}</p>
+                            <p style="font-size: 0.65rem; opacity: 0.6;">${evt.timestamp}</p>
+                        </div>
+                        <button onclick="removeEvent(${idx})" class="btn-delete">Eliminar</button>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+        }
+
+        function savePatient(e) {
+            e.preventDefault();
+            const doc = document.getElementById('p-doc').value;
+            const nombres = document.getElementById('p-nombres').value;
+            const apellidos = document.getElementById('p-apellidos').value;
+            const tel = document.getElementById('p-tel').value;
+
+            const event = {
+                event_id: 'evt_pat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                timestamp: new Date().toISOString(),
+                action: 'CREATE_PATIENT',
+                data: {
+                    Documento: doc,
+                    TipoDoc: 'CC',
+                    Nombres: nombres,
+                    Apellidos: apellidos,
+                    Telefono: tel,
+                    Municipio: '25126',
+                    TipoUsuario: '12'
+                }
+            };
+
+            eventsQueue.push(event);
+            localStorage.setItem('iora_events_queue', JSON.stringify(eventsQueue));
+            
+            e.target.reset();
+            updateUI();
+
+            if (driveLinked) {
+                syncWithDrive();
+            }
+        }
+
+        function saveTransaction(e) {
+            e.preventDefault();
+            const tipo = document.getElementById('t-tipo').value;
+            const cliente = document.getElementById('t-cliente').value;
+            const concepto = document.getElementById('t-concepto').value;
+            const monto = parseFloat(document.getElementById('t-monto').value);
+
+            const event = {
+                event_id: 'evt_tr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                timestamp: new Date().toISOString(),
+                action: 'CREATE_TRANSACTION',
+                data: {
+                    fecha: new Date().toISOString().split('T')[0],
+                    cliente_proveedor: cliente,
+                    item: concepto,
+                    tipo: tipo,
+                    monto: monto,
+                    es_bancario: 0,
+                    banco_comentarios: 'Pago offline móvil'
+                }
+            };
+
+            eventsQueue.push(event);
+            localStorage.setItem('iora_events_queue', JSON.stringify(eventsQueue));
+            
+            e.target.reset();
+            updateUI();
+
+            if (driveLinked) {
+                syncWithDrive();
+            }
+        }
+
+        function removeEvent(idx) {
+            eventsQueue.splice(idx, 1);
+            localStorage.setItem('iora_events_queue', JSON.stringify(eventsQueue));
+            updateUI();
+        }
+
+        function clearAllEvents() {
+            if (confirm("¿Estás seguro de que deseas limpiar la lista? Esto eliminará los datos sin sincronizar.")) {
+                eventsQueue = [];
+                localStorage.setItem('iora_events_queue', JSON.stringify([]));
+                updateUI();
+            }
+        }
+
+        // Toggle vinculación a Google Drive
+        document.getElementById('btn-drive-toggle').addEventListener('click', () => {
+            if (driveLinked) {
+                localStorage.removeItem('google_access_token');
+                accessToken = null;
+                driveLinked = false;
+                updateUI();
+            } else {
+                tokenClient.requestAccessToken({ prompt: 'consent' });
+            }
+        });
+
+        // Sincronización usando llamadas REST fetch a la API de Drive v3
+        async function syncWithDrive() {
+            if (eventsQueue.length === 0) return;
+            if (!accessToken) {
+                return;
+            }
+
+            const btnSync = document.getElementById('btn-sync-action');
+            btnSync.innerText = "Sincronizando...";
+            btnSync.disabled = true;
+
+            const headers = { 'Authorization': 'Bearer ' + accessToken };
+
+            try {
+                // 1. Buscar o crear carpeta raíz Iora_Sync
+                let folderId = localStorage.getItem('google_folder_id');
+                if (!folderId) {
+                    folderId = await getOrCreateSyncFolder(headers);
+                }
+
+                // 2. Subir eventos pendientes
+                for (let i = 0; i < eventsQueue.length; i++) {
+                    const evt = eventsQueue[i];
+                    await uploadEventFile(evt, folderId, headers);
+                }
+
+                eventsQueue = [];
+                localStorage.setItem('iora_events_queue', JSON.stringify([]));
+                alert("¡Sincronizado con éxito!");
+            } catch (err) {
+                console.error("Error al sincronizar con Drive:", err);
+                alert("Error al sincronizar directamente con Drive: " + err.message);
+                
+                // Si el token expiró (401), desvincular para reconectar
+                if (err.status === 401 || err.message.includes("401")) {
+                    localStorage.removeItem('google_access_token');
+                    accessToken = null;
+                    driveLinked = false;
+                }
+            } finally {
+                btnSync.innerText = "Sincronizar a Google Drive ahora";
+                btnSync.disabled = false;
+                updateUI();
+            }
+        }
+
+        async function getOrCreateSyncFolder(headers) {
+            const query = encodeURIComponent("name = 'Iora_Sync' and mimeType = 'application/vnd.google-apps.folder' and trashed = false");
+            const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id)`, { headers });
+            
+            if (!response.ok) {
+                throw new Error("No se pudo buscar la carpeta raíz de sincronización.");
+            }
+            
+            const data = await response.json();
+            let files = data.files;
+            if (files && files.length > 0) {
+                const folderId = files[0].id;
+                localStorage.setItem('google_folder_id', folderId);
+                return await getOrCreateInboxFolder(folderId, headers);
+            }
+
+            // Crear carpeta raíz
+            const createResponse = await fetch('https://www.googleapis.com/drive/v3/files', {
+                method: 'POST',
+                headers: {
+                    ...headers,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: 'Iora_Sync',
+                    mimeType: 'application/vnd.google-apps.folder'
+                })
+            });
+            
+            if (!createResponse.ok) {
+                throw new Error("No se pudo crear la carpeta raíz Iora_Sync.");
+            }
+            
+            const folderData = await createResponse.json();
+            const rootFolderId = folderData.id;
+            return await getOrCreateInboxFolder(rootFolderId, headers);
+        }
+
+        async function getOrCreateInboxFolder(parentFolderId, headers) {
+            const query = encodeURIComponent(`name = 'inbox' and '${parentFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`);
+            const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id)`, { headers });
+            
+            if (!response.ok) {
+                throw new Error("No se pudo buscar la subcarpeta inbox.");
+            }
+            
+            const data = await response.json();
+            let files = data.files;
+            if (files && files.length > 0) {
+                return files[0].id;
+            }
+
+            // Crear subcarpeta inbox
+            const createResponse = await fetch('https://www.googleapis.com/drive/v3/files', {
+                method: 'POST',
+                headers: {
+                    ...headers,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: 'inbox',
+                    mimeType: 'application/vnd.google-apps.folder',
+                    parents: [parentFolderId]
+                })
+            });
+            
+            if (!createResponse.ok) {
+                throw new Error("No se pudo crear la subcarpeta inbox.");
+            }
+            
+            const folderData = await createResponse.json();
+            return folderData.id;
+        }
+
+        async function uploadEventFile(evt, inboxFolderId, headers) {
+            const boundary = 'foo_bar_boundary';
+            const metadata = {
+                name: `${evt.event_id}.txt`,
+                parents: [inboxFolderId]
+            };
+            
+            // Corregido formato multipart para no incluir saltos de línea incorrectos al inicio
+            const multipartBody = 
+                `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
+                `\r\n--${boundary}\r\nContent-Type: text/plain\r\n\r\n${JSON.stringify(evt, null, 2)}\r\n` +
+                `\r\n--${boundary}--`;
+
+            const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                method: 'POST',
+                headers: {
+                    ...headers,
+                    'Content-Type': `multipart/related; boundary=${boundary}`
+                },
+                body: multipartBody
+            });
+            
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                const errMsg = errData.error?.message || `HTTP ${response.status}`;
+                const err = new Error(errMsg);
+                err.status = response.status;
+                throw err;
+            }
+        }
+    </script>
+</body>
+</html>
