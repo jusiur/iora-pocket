@@ -779,10 +779,16 @@
                         badgeBg = 'var(--danger-light)';
                     }
 
+                    let cancelBtn = '';
+                    if (cita.estado !== 'Cancelada') {
+                        cancelBtn = `<button onclick="cancelCita('${cita.cita_id}', '${cita.paciente_nombre}')" style="background: none; border: none; color: var(--danger); font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-top: 4px; display: inline-block;">Cancelar Cita</button>`;
+                    }
+
                     item.innerHTML = `
                         <div class="list-item-details">
                             <h4>${cita.paciente_nombre}</h4>
                             <p>🕒 ${cita.hora_inicio} - ${cita.hora_fin} | 🩺 ${cita.procedimiento || 'Sin procedimiento'}</p>
+                            ${cancelBtn}
                         </div>
                         <span class="list-item-badge" style="color: ${badgeColor}; background-color: ${badgeBg}">${cita.estado}</span>
                     `;
@@ -979,6 +985,33 @@
             }
             showToast("📅 Solicitud de cita guardada en cola local.");
             switchNav('agenda');
+        }
+
+        // Función para solicitar cancelación de una cita
+        function cancelCita(citaId, pacienteNombre) {
+            if (confirm(`¿Estás seguro de que deseas solicitar la cancelación de la cita de ${pacienteNombre}?`)) {
+                const event = {
+                    event_id: 'evt_cancel_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    timestamp: new Date().toISOString(),
+                    action: 'CANCEL_CITA_REQUEST',
+                    data: {
+                        cita_id: citaId
+                    }
+                };
+
+                // Añadir a la cola y sincronizar
+                queueEvent(event);
+                
+                // Actualizar optimísticamente la interfaz local
+                const cita = cacheAgenda.citas.find(c => c.cita_id === citaId);
+                if (cita) {
+                    cita.estado = 'Cancelada';
+                    localStorage.setItem('iora_cache_agenda', JSON.stringify(cacheAgenda));
+                    renderAgenda();
+                }
+                
+                showToast("📅 Solicitud de cancelación guardada en cola.");
+            }
         }
 
         // 2. Guardar Transacción (Genera Evento)
