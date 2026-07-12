@@ -940,6 +940,14 @@
         // 1. Guardar Cita (Genera Evento)
         function saveCita(e) {
             e.preventDefault();
+            
+            // Deshabilitar botón para evitar doble clic accidental
+            const btn = e.target.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Guardando...";
+            }
+
             const nombre = document.getElementById('c-nombre').value;
             const doc = document.getElementById('c-doc').value;
             const tel = document.getElementById('c-tel').value;
@@ -965,6 +973,10 @@
 
             queueEvent(event);
             e.target.reset();
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = "Solicitar Cita";
+            }
             showToast("📅 Solicitud de cita guardada en cola local.");
             switchNav('agenda');
         }
@@ -972,6 +984,13 @@
         // 2. Guardar Transacción (Genera Evento)
         function saveTransaction(e) {
             e.preventDefault();
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Guardando...";
+            }
+
             const tipo = document.getElementById('t-tipo').value;
             const cliente = document.getElementById('t-cliente').value;
             const concepto = document.getElementById('t-concepto').value;
@@ -994,6 +1013,10 @@
 
             queueEvent(event);
             e.target.reset();
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = "Guardar Transacción";
+            }
             showToast("💵 Transacción guardada en cola local.");
             switchNav('finanzas');
         }
@@ -1001,6 +1024,13 @@
         // 3. Guardar Paciente (Genera Evento)
         function savePatient(e) {
             e.preventDefault();
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Guardando...";
+            }
+
             const doc = document.getElementById('p-doc').value;
             const tipodoc = document.getElementById('p-tipodoc').value;
             const nombres = document.getElementById('p-nombres').value;
@@ -1028,6 +1058,10 @@
 
             queueEvent(event);
             e.target.reset();
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = "Guardar Paciente";
+            }
             showToast("👥 Paciente guardado en cola local.");
             switchNav('pacientes');
         }
