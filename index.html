@@ -1116,7 +1116,13 @@
                 showToast("Descargando actualizaciones del consultorio...");
                 
                 // Intentar descargar cada archivo resumen
-                const parentFolderId = localStorage.getItem('google_parent_folder_id');
+                let parentFolderId = localStorage.getItem('google_parent_folder_id');
+                if (!parentFolderId) {
+                    // Si el usuario vinculó su Drive con la versión vieja, no tendrá esta clave. La resolvemos dinámicamente.
+                    await getOrCreateSyncFolder(headers);
+                    parentFolderId = localStorage.getItem('google_parent_folder_id');
+                }
+
                 if (parentFolderId) {
                     const agenda = await downloadFileFromDrive('agenda_semana.json', parentFolderId, headers);
                     if (agenda) {
