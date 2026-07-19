@@ -1187,15 +1187,38 @@
             const cleanQuery = (query || '').trim().toLowerCase();
             const list = cacheCatalogos.cie10 || [];
             
-            let filtered;
-            if (cleanQuery === '') {
-                filtered = list.slice(0, 8);
-            } else {
-                filtered = list.filter(item => item.toLowerCase().includes(cleanQuery)).slice(0, 8);
+            // Buscar CUPS seleccionado y filtrar diagnósticos compatibles si el mapa de cruces existe
+            const selectedCupsCode = document.getElementById('e-cups').value;
+            let allowedDxCodes = null;
+            if (selectedCupsCode && cacheCatalogos.cups_cie10_map && cacheCatalogos.cups_cie10_map[selectedCupsCode]) {
+                allowedDxCodes = cacheCatalogos.cups_cie10_map[selectedCupsCode];
             }
             
+            let filtered = list;
+            if (allowedDxCodes && allowedDxCodes.length > 0) {
+                filtered = list.filter(item => {
+                    const codeMatch = item.match(/\(([^)]+)\)/);
+                    if (codeMatch) {
+                        const cie10Code = codeMatch[1].toUpperCase();
+                        // Validar si el código completo (ej: K045) o su categoría base (ej: K04) está permitido
+                        return allowedDxCodes.includes(cie10Code) || allowedDxCodes.includes(cie10Code.substring(0, 3));
+                    }
+                    return false;
+                });
+            }
+            
+            if (cleanQuery !== '') {
+                filtered = filtered.filter(item => item.toLowerCase().includes(cleanQuery));
+            }
+            
+            filtered = filtered.slice(0, 8);
+            
             if (filtered.length === 0) {
-                resultsDiv.innerHTML = '<div class="autocomplete-item">Sin resultados</div>';
+                if (allowedDxCodes) {
+                    resultsDiv.innerHTML = '<div class="autocomplete-item" style="color: var(--danger); font-size: 0.8rem; padding: 10px;">⚠️ Ningún diagnóstico compatible con el CUPS elegido</div>';
+                } else {
+                    resultsDiv.innerHTML = '<div class="autocomplete-item">Sin resultados</div>';
+                }
             } else {
                 resultsDiv.innerHTML = filtered.map(item => {
                     const codeMatch = item.match(/\(([^)]+)\)/);
