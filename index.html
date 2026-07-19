@@ -591,14 +591,14 @@
 
                     <div class="form-group" style="position: relative;">
                         <label>Procedimiento (CUPS)</label>
-                        <input type="text" id="e-cups-search" placeholder="Escribe para buscar código o nombre..." oninput="searchCups(this.value)" required autocomplete="off">
+                        <input type="text" id="e-cups-search" placeholder="Escribe para buscar código o nombre..." oninput="searchCups(this.value)" onfocus="searchCups(this.value)" onclick="searchCups(this.value)" required autocomplete="off">
                         <input type="hidden" id="e-cups" required>
                         <div id="e-cups-results" class="autocomplete-results" style="display: none;"></div>
                     </div>
 
                     <div class="form-group" style="position: relative;">
                         <label>Diagnóstico Principal (CIE-10)</label>
-                        <input type="text" id="e-cie10-search" placeholder="Escribe para buscar código o nombre..." oninput="searchCie10(this.value)" required autocomplete="off">
+                        <input type="text" id="e-cie10-search" placeholder="Escribe para buscar código o nombre..." oninput="searchCie10(this.value)" onfocus="searchCie10(this.value)" onclick="searchCie10(this.value)" required autocomplete="off">
                         <input type="hidden" id="e-cie10" required>
                         <div id="e-cie10-results" class="autocomplete-results" style="display: none;"></div>
                     </div>
@@ -613,7 +613,7 @@
                             </div>
                             <div style="position: relative;">
                                 <label>Procedimiento Dental</label>
-                                <input type="text" id="e-diente-proc" placeholder="Ej: Resina, Extracción" oninput="searchDentalProc(this.value)" autocomplete="off">
+                                <input type="text" id="e-diente-proc" placeholder="Ej: Resina, Extracción" oninput="searchDentalProc(this.value)" onfocus="searchDentalProc(this.value)" onclick="searchDentalProc(this.value)" autocomplete="off">
                                 <div id="e-diente-proc-results" class="autocomplete-results" style="display: none;"></div>
                             </div>
                         </div>
