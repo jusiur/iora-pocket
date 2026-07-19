@@ -1574,7 +1574,13 @@
         }
 
         // Sincronización Global
+        let isSyncing = false;
         async function syncEverything() {
+            if (isSyncing) return;
+            
+            const btn = document.getElementById('btn-sync-action');
+            if (btn && btn.disabled) return;
+
             let activeToken;
             try {
                 activeToken = await getValidToken();
@@ -1586,10 +1592,11 @@
                 return;
             }
 
-            const btn = document.getElementById('btn-sync-action');
-            const origText = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner"></span> Sincronizando...';
-            btn.disabled = true;
+            isSyncing = true;
+            if (btn) {
+                btn.innerHTML = '<span class="spinner"></span> Sincronizando...';
+                btn.disabled = true;
+            }
 
             const headers = { 'Authorization': 'Bearer ' + activeToken };
 
@@ -1666,8 +1673,11 @@
                     driveLinked = false;
                 }
             } finally {
-                btn.innerHTML = origText;
-                btn.disabled = false;
+                isSyncing = false;
+                if (btn) {
+                    btn.innerHTML = "Sincronizar Todo Ahora";
+                    btn.disabled = false;
+                }
                 updateUIState();
             }
         }
