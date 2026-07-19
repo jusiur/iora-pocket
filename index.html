@@ -1242,9 +1242,9 @@
             
             let filtered;
             if (cleanQuery === '') {
-                filtered = DENTAL_PROCS.slice(0, 8);
+                filtered = DENTAL_PROCS;
             } else {
-                filtered = DENTAL_PROCS.filter(item => item.toLowerCase().includes(cleanQuery)).slice(0, 8);
+                filtered = DENTAL_PROCS.filter(item => item.toLowerCase().includes(cleanQuery));
             }
             
             if (filtered.length === 0) {
