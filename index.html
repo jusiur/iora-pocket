@@ -471,7 +471,7 @@
             <div class="logo-container">
                 <div class="logo-icon">I</div>
                 <div>
-                    <h1>IORA Pocket</h1>
+                    <h1>IORA Pocket <span id="specialty-badge" style="font-size: 0.75rem; background: var(--accent); color: white; padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; font-weight: bold;">Odonto</span></h1>
                 </div>
             </div>
             <div class="status-badge">
@@ -816,6 +816,19 @@
             const odontoDiv = document.getElementById('odontograma-container');
             if (odontoDiv) {
                 odontoDiv.style.display = currentSpecialty === 'odontologia' ? 'block' : 'none';
+            }
+            const badge = document.getElementById('specialty-badge');
+            if (badge) {
+                if (currentSpecialty === 'fonoaudiologia') {
+                    badge.innerText = 'Fono';
+                    badge.style.background = '#3b82f6';
+                } else if (currentSpecialty === 'terapia_ocupacional') {
+                    badge.innerText = 'T.O.';
+                    badge.style.background = '#8b5cf6';
+                } else {
+                    badge.innerText = 'Odonto';
+                    badge.style.background = 'var(--accent)';
+                }
             }
         }
 
