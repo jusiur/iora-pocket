@@ -611,9 +611,10 @@
                                 <label>Órgano Dental (Diente)</label>
                                 <input type="number" id="e-diente" placeholder="Ej: 46 o 11" min="11" max="85">
                             </div>
-                            <div>
+                            <div style="position: relative;">
                                 <label>Procedimiento Dental</label>
-                                <input type="text" id="e-diente-proc" placeholder="Ej: Resina, Extracción">
+                                <input type="text" id="e-diente-proc" placeholder="Ej: Resina, Extracción" oninput="searchDentalProc(this.value)" autocomplete="off">
+                                <div id="e-diente-proc-results" class="autocomplete-results" style="display: none;"></div>
                             </div>
                         </div>
                         <label>Superficies afectadas</label>
@@ -1141,16 +1142,26 @@
             }
         }
 
+        // Lista de Hallazgos y Procedimientos Dentales Oficiales (Iora PC)
+        const DENTAL_PROCS = [
+            "Abfracción", "Absceso / Fístula", "Amalgama", "Ausente", "Caries", "Caries Recurrente", "Carilla en Cerámica", "Carilla en Resina", "Corona", "Corona Temporal",
+            "Diente Impactado / Incluido", "Diente en Erupción", "Endodoncia", "Extracción", "Faceta de desgaste", "Fractura", "Giroversión", "Hipoplasia",
+            "Implante", "Incrustación", "Ionómero", "Migración / Inclinación", "Movilidad Grado 1", "Movilidad Grado 2", "Movilidad Grado 3",
+            "Obturación Temporal", "Ortodoncia (Banda)", "Ortodoncia (Brackets)", "Ortodoncia (Rango 15-25)", "Ortodoncia (Rango 35-45)", "Perno Muñón", "Prótesis Fija - Pilar", "Prótesis Fija - Póntico", "Prótesis Removible", "Pulpotomía", "Resina", "Restauración Defectuosa", "Sano", "Sellante"
+        ];
+
         // Búsqueda de CUPS
         function searchCups(query) {
             const resultsDiv = document.getElementById('e-cups-results');
-            if (!query || query.length < 2) {
-                resultsDiv.style.display = 'none';
-                return;
-            }
-            const cleanQuery = query.toLowerCase();
+            const cleanQuery = (query || '').trim().toLowerCase();
             const list = cacheCatalogos.cups || [];
-            const filtered = list.filter(item => item.toLowerCase().includes(cleanQuery)).slice(0, 8);
+            
+            let filtered;
+            if (cleanQuery === '') {
+                filtered = list.slice(0, 8);
+            } else {
+                filtered = list.filter(item => item.toLowerCase().includes(cleanQuery)).slice(0, 8);
+            }
             
             if (filtered.length === 0) {
                 resultsDiv.innerHTML = '<div class="autocomplete-item">Sin resultados</div>';
@@ -1173,13 +1184,15 @@
         // Búsqueda de CIE-10
         function searchCie10(query) {
             const resultsDiv = document.getElementById('e-cie10-results');
-            if (!query || query.length < 2) {
-                resultsDiv.style.display = 'none';
-                return;
-            }
-            const cleanQuery = query.toLowerCase();
+            const cleanQuery = (query || '').trim().toLowerCase();
             const list = cacheCatalogos.cie10 || [];
-            const filtered = list.filter(item => item.toLowerCase().includes(cleanQuery)).slice(0, 8);
+            
+            let filtered;
+            if (cleanQuery === '') {
+                filtered = list.slice(0, 8);
+            } else {
+                filtered = list.filter(item => item.toLowerCase().includes(cleanQuery)).slice(0, 8);
+            }
             
             if (filtered.length === 0) {
                 resultsDiv.innerHTML = '<div class="autocomplete-item">Sin resultados</div>';
@@ -1199,6 +1212,44 @@
             document.getElementById('e-cie10-results').style.display = 'none';
         }
 
+        // Búsqueda de Procedimiento Dental (Odontograma)
+        function searchDentalProc(query) {
+            const resultsDiv = document.getElementById('e-diente-proc-results');
+            const cleanQuery = (query || '').trim().toLowerCase();
+            
+            let filtered;
+            if (cleanQuery === '') {
+                filtered = DENTAL_PROCS.slice(0, 8);
+            } else {
+                filtered = DENTAL_PROCS.filter(item => item.toLowerCase().includes(cleanQuery)).slice(0, 8);
+            }
+            
+            if (filtered.length === 0) {
+                resultsDiv.innerHTML = '<div class="autocomplete-item">Sin resultados</div>';
+            } else {
+                resultsDiv.innerHTML = filtered.map(item => {
+                    return `<div class="autocomplete-item" onclick="selectDentalProc('${item.replace(/'/g, "\\'")}')">${item}</div>`;
+                }).join('');
+            }
+            resultsDiv.style.display = 'block';
+        }
+
+        function selectDentalProc(val) {
+            document.getElementById('e-diente-proc').value = val;
+            document.getElementById('e-diente-proc-results').style.display = 'none';
+        }
+
+        // Configurar oyentes de eventos al hacer foco para expandir automáticamente las opciones
+        document.getElementById('e-cups-search').addEventListener('focus', function() {
+            searchCups(this.value);
+        });
+        document.getElementById('e-cie10-search').addEventListener('focus', function() {
+            searchCie10(this.value);
+        });
+        document.getElementById('e-diente-proc').addEventListener('focus', function() {
+            searchDentalProc(this.value);
+        });
+
         // Cerrar resultados de autocompletado si se hace clic por fuera
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#e-cups-search')) {
@@ -1207,6 +1258,10 @@
             }
             if (!e.target.closest('#e-cie10-search')) {
                 const div = document.getElementById('e-cie10-results');
+                if (div) div.style.display = 'none';
+            }
+            if (!e.target.closest('#e-diente-proc')) {
+                const div = document.getElementById('e-diente-proc-results');
                 if (div) div.style.display = 'none';
             }
         });
