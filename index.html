@@ -431,6 +431,36 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* Autocomplete styles */
+        .autocomplete-results {
+            position: absolute;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 100;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            margin-top: 4px;
+        }
+        .autocomplete-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--text-main);
+            text-align: left;
+            transition: background-color 0.2s ease;
+        }
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        .autocomplete-item:hover {
+            background-color: var(--accent);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -499,6 +529,7 @@
         <div id="section-nuevo" class="section">
             <div class="sub-tabs">
                 <button class="sub-tab-btn active" id="subtab-btn-cita" onclick="switchSubTab('cita')">Cita</button>
+                <button class="sub-tab-btn" id="subtab-btn-evo" onclick="switchSubTab('evo')">Evolución</button>
                 <button class="sub-tab-btn" id="subtab-btn-trans" onclick="switchSubTab('trans')">Transacción</button>
                 <button class="sub-tab-btn" id="subtab-btn-pac" onclick="switchSubTab('pac')">Paciente</button>
             </div>
@@ -544,6 +575,69 @@
                         <input type="text" id="c-procedimiento" placeholder="Ej: Calza, Valoración, etc.">
                     </div>
                     <button type="submit" class="btn">Solicitar Cita</button>
+                </form>
+            </div>
+
+            <!-- Formulario Nueva Evolución -->
+            <div id="form-evo" class="card" style="display: none;">
+                <div class="card-title">✍️ Registro de Evolución Clínica</div>
+                <form onsubmit="saveEvolution(event)">
+                    <div class="form-group">
+                        <label>Seleccionar Paciente</label>
+                        <select id="e-paciente-select" required>
+                            <option value="">-- Elegir paciente --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="position: relative;">
+                        <label>Procedimiento (CUPS)</label>
+                        <input type="text" id="e-cups-search" placeholder="Escribe para buscar código o nombre..." oninput="searchCups(this.value)" required autocomplete="off">
+                        <input type="hidden" id="e-cups" required>
+                        <div id="e-cups-results" class="autocomplete-results" style="display: none;"></div>
+                    </div>
+
+                    <div class="form-group" style="position: relative;">
+                        <label>Diagnóstico Principal (CIE-10)</label>
+                        <input type="text" id="e-cie10-search" placeholder="Escribe para buscar código o nombre..." oninput="searchCie10(this.value)" required autocomplete="off">
+                        <input type="hidden" id="e-cie10" required>
+                        <div id="e-cie10-results" class="autocomplete-results" style="display: none;"></div>
+                    </div>
+
+                    <!-- Odontograma Simplificado -->
+                    <div class="form-group" style="border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-md); background: rgba(0,0,0,0.15); margin-bottom: 14px;">
+                        <label style="font-weight: 700; color: var(--accent); margin-bottom: 8px;">🦷 Odontograma (Opcional)</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                            <div>
+                                <label>Órgano Dental (Diente)</label>
+                                <input type="number" id="e-diente" placeholder="Ej: 46 o 11" min="11" max="85">
+                            </div>
+                            <div>
+                                <label>Procedimiento Dental</label>
+                                <input type="text" id="e-diente-proc" placeholder="Ej: Resina, Extracción">
+                            </div>
+                        </div>
+                        <label>Superficies afectadas</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px;">
+                            <label style="display: inline-flex; align-items: center; gap: 4px; text-transform: none; font-size: 0.9rem; color: var(--text-main);"><input type="checkbox" id="e-surf-o" style="width: auto; margin-right: 2px;"> Oclusal</label>
+                            <label style="display: inline-flex; align-items: center; gap: 4px; text-transform: none; font-size: 0.9rem; color: var(--text-main);"><input type="checkbox" id="e-surf-m" style="width: auto; margin-right: 2px;"> Mesial</label>
+                            <label style="display: inline-flex; align-items: center; gap: 4px; text-transform: none; font-size: 0.9rem; color: var(--text-main);"><input type="checkbox" id="e-surf-d" style="width: auto; margin-right: 2px;"> Distal</label>
+                            <label style="display: inline-flex; align-items: center; gap: 4px; text-transform: none; font-size: 0.9rem; color: var(--text-main);"><input type="checkbox" id="e-surf-v" style="width: auto; margin-right: 2px;"> Vestibular</label>
+                            <label style="display: inline-flex; align-items: center; gap: 4px; text-transform: none; font-size: 0.9rem; color: var(--text-main);"><input type="checkbox" id="e-surf-l" style="width: auto; margin-right: 2px;"> Lingual</label>
+                            <label style="display: inline-flex; align-items: center; gap: 4px; text-transform: none; font-size: 0.9rem; color: var(--text-main);"><input type="checkbox" id="e-surf-p" style="width: auto; margin-right: 2px;"> Palatino</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Evolución Clínica (Dictado por Voz 🎙️)</label>
+                        <textarea id="e-evolucion" required rows="4" placeholder="Usa el micrófono de tu teclado para dictar la evolución clínica del paciente..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Trazabilidad de Esterilización / DMER (Opcional)</label>
+                        <input type="text" id="e-esterilizacion" placeholder="Ej: Lote EST-2026-07-19-A, Instrumental de operatoria">
+                    </div>
+
+                    <button type="submit" class="btn">Guardar Evolución</button>
                 </form>
             </div>
 
@@ -673,19 +767,28 @@
 
         let tokenClient;
         let accessToken = localStorage.getItem('google_access_token') || null;
-        let driveLinked = !!accessToken;
+        let driveLinked = localStorage.getItem('iora_drive_linked') === 'true';
         let eventsQueue = JSON.parse(localStorage.getItem('iora_events_queue') || '[]');
 
         // Memoria en caché local
         let cacheAgenda = JSON.parse(localStorage.getItem('iora_cache_agenda') || '{"citas":[]}');
         let cacheFinanzas = JSON.parse(localStorage.getItem('iora_cache_finanzas') || '{"kpis":{"total_ingresos":0,"total_egresos":0,"caja_actual":0},"recientes":[]}');
         let cachePacientes = JSON.parse(localStorage.getItem('iora_cache_pacientes') || '{"pacientes":[]}');
+        let cacheCatalogos = JSON.parse(localStorage.getItem('iora_cache_catalogos') || '{"cups":[],"cie10":[]}');
 
         // Inicialización
         window.onload = () => {
             loadGoogleApis();
             renderAllData();
             updateUIState();
+            
+            // Auto-sincronización periódica cada 5 minutos si está vinculado y la pestaña está visible/activa
+            setInterval(() => {
+                if (driveLinked && document.visibilityState === 'visible') {
+                    console.log("[Iora Pocket] Iniciando auto-sincronización periódica...");
+                    syncEverything();
+                }
+            }, 300000);
         };
 
         function showToast(message, duration = 3000) {
@@ -704,11 +807,17 @@
 
             document.getElementById(`section-${section}`).classList.add('active');
             document.getElementById(`nav-btn-${section}`).classList.add('active');
+            
+            // Si navega a sync o cambia, sincronizar
+            if (section === 'sync' && driveLinked) {
+                syncEverything();
+            }
         }
 
         // Sub-tabs de la pestaña "Nuevo"
         function switchSubTab(formName) {
             document.getElementById('form-cita').style.display = formName === 'cita' ? 'block' : 'none';
+            document.getElementById('form-evo').style.display = formName === 'evo' ? 'block' : 'none';
             document.getElementById('form-trans').style.display = formName === 'trans' ? 'block' : 'none';
             document.getElementById('form-pac').style.display = formName === 'pac' ? 'block' : 'none';
 
@@ -722,6 +831,7 @@
             renderFinanzas();
             renderPacientes();
             populatePatientSelect();
+            populateEvoPatientSelect();
         }
 
         // 1. Renderizador de Agenda
@@ -898,6 +1008,23 @@
             });
         }
 
+        // Llenar el desplegable de pacientes en Evoluciones
+        function populateEvoPatientSelect() {
+            const select = document.getElementById('e-paciente-select');
+            select.innerHTML = '<option value="">-- Elegir paciente --</option>';
+            
+            const pacientes = cachePacientes.pacientes || [];
+            pacientes.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.documento;
+                opt.text = `${p.nombres} ${p.apellidos} (${p.documento})`;
+                opt.setAttribute('data-sexo', p.sexo || 'M');
+                opt.setAttribute('data-nac', p.fecha_nac || '1990-01-01');
+                opt.setAttribute('data-tipo-usuario', p.tipo_usuario || '12');
+                select.appendChild(opt);
+            });
+        }
+
         // Auto-llenar campos de cita al elegir paciente del desplegable
         function syncCitaPatientFields() {
             const select = document.getElementById('c-paciente-select');
@@ -1014,6 +1141,151 @@
             }
         }
 
+        // Búsqueda de CUPS
+        function searchCups(query) {
+            const resultsDiv = document.getElementById('e-cups-results');
+            if (!query || query.length < 2) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+            const cleanQuery = query.toLowerCase();
+            const list = cacheCatalogos.cups || [];
+            const filtered = list.filter(item => item.toLowerCase().includes(cleanQuery)).slice(0, 8);
+            
+            if (filtered.length === 0) {
+                resultsDiv.innerHTML = '<div class="autocomplete-item">Sin resultados</div>';
+            } else {
+                resultsDiv.innerHTML = filtered.map(item => {
+                    const codeMatch = item.match(/\(([^)]+)\)/);
+                    const code = codeMatch ? codeMatch[1] : '';
+                    return `<div class="autocomplete-item" onclick="selectCups('${item.replace(/'/g, "\\'")}', '${code}')">${item}</div>`;
+                }).join('');
+            }
+            resultsDiv.style.display = 'block';
+        }
+
+        function selectCups(fullText, code) {
+            document.getElementById('e-cups-search').value = fullText;
+            document.getElementById('e-cups').value = code;
+            document.getElementById('e-cups-results').style.display = 'none';
+        }
+
+        // Búsqueda de CIE-10
+        function searchCie10(query) {
+            const resultsDiv = document.getElementById('e-cie10-results');
+            if (!query || query.length < 2) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+            const cleanQuery = query.toLowerCase();
+            const list = cacheCatalogos.cie10 || [];
+            const filtered = list.filter(item => item.toLowerCase().includes(cleanQuery)).slice(0, 8);
+            
+            if (filtered.length === 0) {
+                resultsDiv.innerHTML = '<div class="autocomplete-item">Sin resultados</div>';
+            } else {
+                resultsDiv.innerHTML = filtered.map(item => {
+                    const codeMatch = item.match(/\(([^)]+)\)/);
+                    const code = codeMatch ? codeMatch[1] : '';
+                    return `<div class="autocomplete-item" onclick="selectCie10('${item.replace(/'/g, "\\'")}', '${code}')">${item}</div>`;
+                }).join('');
+            }
+            resultsDiv.style.display = 'block';
+        }
+
+        function selectCie10(fullText, code) {
+            document.getElementById('e-cie10-search').value = fullText;
+            document.getElementById('e-cie10').value = code;
+            document.getElementById('e-cie10-results').style.display = 'none';
+        }
+
+        // Cerrar resultados de autocompletado si se hace clic por fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#e-cups-search')) {
+                const div = document.getElementById('e-cups-results');
+                if (div) div.style.display = 'none';
+            }
+            if (!e.target.closest('#e-cie10-search')) {
+                const div = document.getElementById('e-cie10-results');
+                if (div) div.style.display = 'none';
+            }
+        });
+
+        // Guardar Evolución (Genera Evento CREATE_ATENCION)
+        function saveEvolution(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Guardando...";
+            }
+
+            const pacienteSelect = document.getElementById('e-paciente-select');
+            const pacienteDoc = pacienteSelect.value;
+            const selectedOpt = pacienteSelect.options[pacienteSelect.selectedIndex];
+            
+            const cupsCode = document.getElementById('e-cups').value;
+            const cie10Code = document.getElementById('e-cie10').value;
+            
+            const diente = document.getElementById('e-diente').value;
+            const proc = document.getElementById('e-diente-proc').value;
+            let surfaces = [];
+            if (document.getElementById('e-surf-o').checked) surfaces.push('O');
+            if (document.getElementById('e-surf-m').checked) surfaces.push('M');
+            if (document.getElementById('e-surf-d').checked) surfaces.push('D');
+            if (document.getElementById('e-surf-v').checked) surfaces.push('V');
+            if (document.getElementById('e-surf-l').checked) surfaces.push('L');
+            if (document.getElementById('e-surf-p').checked) surfaces.push('P');
+            
+            let organoDental = "";
+            if (diente) {
+                organoDental = `${diente}-${surfaces.join('') || 'General'}-${proc || 'Tratamiento'}`;
+            }
+
+            const evolucion = document.getElementById('e-evolucion').value;
+            const esterilizacion = document.getElementById('e-esterilizacion').value.trim();
+
+            // Formatear nota de evolución para incluir la trazabilidad de esterilización si fue provista
+            const evolucionCompleta = esterilizacion 
+                ? `${evolucion}\n\nTrazabilidad Esterilización / DMER: ${esterilizacion}`
+                : evolucion;
+
+            const event = {
+                event_id: 'evt_at_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                timestamp: new Date().toISOString(),
+                action: 'CREATE_ATENCION',
+                data: {
+                    fecha: new Date().toISOString().split('T')[0] + ' ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                    paciente: pacienteDoc,
+                    cups: cupsCode,
+                    diagnostico: cie10Code,
+                    evolucion_clinica: evolucionCompleta,
+                    organo_dental: organoDental,
+                    sexo: selectedOpt.getAttribute('data-sexo') || 'M',
+                    fecha_nac: selectedOpt.getAttribute('data-nac') || '1990-01-01',
+                    tipo_usuario: selectedOpt.getAttribute('data-tipo-usuario') || '12',
+                    finalidad: '16', // Por defecto terapéutico / tratamiento
+                    causa: '38', // Enfermedad general por defecto
+                    valor: 0,
+                    municipio: '25126'
+                }
+            };
+
+            queueEvent(event);
+            e.target.reset();
+            
+            // Limpiar campos ocultos de autocompletado
+            document.getElementById('e-cups').value = '';
+            document.getElementById('e-cie10').value = '';
+            
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = "Guardar Evolución";
+            }
+            showToast("✍️ Evolución clínica guardada en cola local.");
+            switchNav('agenda');
+        }
+
         // 2. Guardar Transacción (Genera Evento)
         function saveTransaction(e) {
             e.preventDefault();
@@ -1121,6 +1393,48 @@
             document.body.appendChild(scriptGsi);
         }
 
+        // Obtener un token de acceso válido (retorna el actual si sirve, o pide uno nuevo silenciosamente)
+        async function getValidToken() {
+            return new Promise((resolve, reject) => {
+                const expiresAt = parseInt(localStorage.getItem('google_token_expires_at') || '0');
+                // Si el token es válido y no expira en los próximos 5 minutos (300.000 ms)
+                if (accessToken && Date.now() < expiresAt - 300000) {
+                    resolve(accessToken);
+                } else {
+                    console.log("[Iora Pocket] El token ha expirado o está cerca de vencer. Renovando de forma silenciosa...");
+                    
+                    // Configurar temporalmente el callback del tokenClient para capturar la renovación
+                    const oldCallback = tokenClient.callback;
+                    tokenClient.callback = (tokenResponse) => {
+                        // Restaurar callback original
+                        tokenClient.callback = oldCallback;
+                        
+                        if (tokenResponse.error !== undefined) {
+                            reject(new Error(tokenResponse.error_description || tokenResponse.error));
+                            return;
+                        }
+                        
+                        accessToken = tokenResponse.access_token;
+                        localStorage.setItem('google_access_token', accessToken);
+                        const newExpiresAt = Date.now() + (tokenResponse.expires_in * 1000);
+                        localStorage.setItem('google_token_expires_at', newExpiresAt);
+                        localStorage.setItem('iora_drive_linked', 'true');
+                        driveLinked = true;
+                        updateUIState();
+                        resolve(accessToken);
+                    };
+                    
+                    try {
+                        // Solicita el token sin prompt (si ya se autorizó, se obtiene de inmediato de forma silenciosa)
+                        tokenClient.requestAccessToken({ prompt: '' });
+                    } catch (e) {
+                        tokenClient.callback = oldCallback;
+                        reject(e);
+                    }
+                }
+            });
+        }
+
         function initGsiClient() {
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
@@ -1132,6 +1446,9 @@
                     }
                     accessToken = tokenResponse.access_token;
                     localStorage.setItem('google_access_token', accessToken);
+                    const expiresAt = Date.now() + (tokenResponse.expires_in * 1000);
+                    localStorage.setItem('google_token_expires_at', expiresAt);
+                    localStorage.setItem('iora_drive_linked', 'true');
                     driveLinked = true;
                     updateUIState();
                     syncEverything();
@@ -1141,26 +1458,57 @@
             document.getElementById('btn-drive-toggle').onclick = () => {
                 if (driveLinked) {
                     localStorage.removeItem('google_access_token');
+                    localStorage.removeItem('google_token_expires_at');
+                    localStorage.removeItem('iora_drive_linked');
                     accessToken = null;
                     driveLinked = false;
                     updateUIState();
                     showToast("Drive desvinculado.");
                 } else {
+                    // Primera vinculación: pedir consentimiento explícito
                     tokenClient.requestAccessToken({ prompt: 'consent' });
                 }
             };
+
+            // Intentar auto-conectar silenciosamente si ya estaba vinculado anteriormente
+            if (localStorage.getItem('iora_drive_linked') === 'true') {
+                console.log("[Iora Pocket] Autoconexión silenciosa iniciada...");
+                const expiresAt = parseInt(localStorage.getItem('google_token_expires_at') || '0');
+                if (accessToken && Date.now() < expiresAt - 300000) {
+                    // El token actual sigue sirviendo, sincronizamos
+                    syncEverything();
+                } else {
+                    // Solicitar un refresh silencioso después de que la API se haya inicializado
+                    setTimeout(() => {
+                        try {
+                            tokenClient.requestAccessToken({ prompt: '' });
+                        } catch(e) {
+                            console.error("[Iora Pocket] Error en auto-conexión inicial silenciosa:", e);
+                        }
+                    }, 800);
+                }
+            }
         }
 
         // Sincronización Global
         async function syncEverything() {
-            if (!accessToken) return;
+            let activeToken;
+            try {
+                activeToken = await getValidToken();
+            } catch (err) {
+                console.warn("[Iora Pocket] No se pudo renovar silenciosamente el token:", err);
+                showToast("⚠️ Conexión con Google Drive suspendida. Toca 'Vincular Google Drive' para volver a conectar.");
+                driveLinked = false;
+                updateUIState();
+                return;
+            }
 
             const btn = document.getElementById('btn-sync-action');
             const origText = btn.innerHTML;
             btn.innerHTML = '<span class="spinner"></span> Sincronizando...';
             btn.disabled = true;
 
-            const headers = { 'Authorization': 'Bearer ' + accessToken };
+            const headers = { 'Authorization': 'Bearer ' + activeToken };
 
             try {
                 // 1. Buscar o crear carpetas de sincronización
@@ -1208,6 +1556,12 @@
                         cachePacientes = pacientes;
                         localStorage.setItem('iora_cache_pacientes', JSON.stringify(pacientes));
                     }
+
+                    const catalogos = await downloadFileFromDrive('catalogos_rips.json', parentFolderId, headers);
+                    if (catalogos) {
+                        cacheCatalogos = catalogos;
+                        localStorage.setItem('iora_cache_catalogos', JSON.stringify(catalogos));
+                    }
                 }
 
                 // Actualizar interfaz con los datos frescos
@@ -1224,6 +1578,7 @@
                 
                 if (err.status === 401 || err.message.includes("401")) {
                     localStorage.removeItem('google_access_token');
+                    localStorage.removeItem('google_token_expires_at');
                     accessToken = null;
                     driveLinked = false;
                 }
