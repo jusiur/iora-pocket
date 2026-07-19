@@ -1640,7 +1640,7 @@
 
             try {
                 // 1. Buscar o crear carpetas de sincronización
-                let folderId = localStorage.getItem('google_folder_id');
+                let folderId = localStorage.getItem(`google_folder_id_${currentSpecialty}`);
                 if (!folderId) {
                     folderId = await getOrCreateSyncFolder(headers);
                 }
@@ -1659,11 +1659,11 @@
                 showToast("Descargando actualizaciones del consultorio...");
                 
                 // Intentar descargar cada archivo resumen
-                let parentFolderId = localStorage.getItem('google_parent_folder_id');
+                let parentFolderId = localStorage.getItem(`google_parent_folder_id_${currentSpecialty}`);
                 if (!parentFolderId) {
                     // Si el usuario vinculó su Drive con la versión vieja, no tendrá esta clave. La resolvemos dinámicamente.
                     await getOrCreateSyncFolder(headers);
-                    parentFolderId = localStorage.getItem('google_parent_folder_id');
+                    parentFolderId = localStorage.getItem(`google_parent_folder_id_${currentSpecialty}`);
                 }
 
                 if (parentFolderId) {
@@ -1730,9 +1730,17 @@
             }
         }
 
-        // Buscar o crear carpeta Iora_Sync
+        // Obtener nombre de la carpeta de sincronización según la especialidad
+        function getSyncFolderName() {
+            if (currentSpecialty === 'fonoaudiologia') return 'Iora_Sync_Fono';
+            if (currentSpecialty === 'terapia_ocupacional') return 'Iora_Sync_TO';
+            return 'Iora_Sync'; // Default/Odontología
+        }
+
+        // Buscar o crear carpeta de sincronización según perfil
         async function getOrCreateSyncFolder(headers) {
-            const query = encodeURIComponent("name = 'Iora_Sync' and mimeType = 'application/vnd.google-apps.folder' and trashed = false");
+            const folderName = getSyncFolderName();
+            const query = encodeURIComponent(`name = '${folderName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`);
             const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id)`, { headers });
             
             if (!response.ok) throw new Error("Falla al buscar carpeta raíz.");
@@ -1746,18 +1754,18 @@
                 const createResponse = await fetch('https://www.googleapis.com/drive/v3/files', {
                     method: 'POST',
                     headers: { ...headers, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: 'Iora_Sync', mimeType: 'application/vnd.google-apps.folder' })
+                    body: JSON.stringify({ name: folderName, mimeType: 'application/vnd.google-apps.folder' })
                 });
-                if (!createResponse.ok) throw new Error("No se pudo crear Iora_Sync.");
+                if (!createResponse.ok) throw new Error(`No se pudo crear ${folderName}.`);
                 const folderData = await createResponse.json();
                 parentFolderId = folderData.id;
             }
 
-            localStorage.setItem('google_parent_folder_id', parentFolderId);
+            localStorage.setItem(`google_parent_folder_id_${currentSpecialty}`, parentFolderId);
             return await getOrCreateInboxFolder(parentFolderId, headers);
         }
 
-        // Buscar o crear subcarpeta Iora_Sync/inbox
+        // Buscar o crear subcarpeta inbox
         async function getOrCreateInboxFolder(parentFolderId, headers) {
             const query = encodeURIComponent(`name = 'inbox' and '${parentFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`);
             const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id)`, { headers });
@@ -1780,7 +1788,7 @@
                 inboxId = folderData.id;
             }
 
-            localStorage.setItem('google_folder_id', inboxId);
+            localStorage.setItem(`google_folder_id_${currentSpecialty}`, inboxId);
             return inboxId;
         }
 
