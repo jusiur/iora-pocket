@@ -1158,9 +1158,9 @@
             
             let filtered;
             if (cleanQuery === '') {
-                filtered = list.slice(0, 8);
+                filtered = list;
             } else {
-                filtered = list.filter(item => item.toLowerCase().includes(cleanQuery)).slice(0, 8);
+                filtered = list.filter(item => item.toLowerCase().includes(cleanQuery));
             }
             
             if (filtered.length === 0) {
@@ -1211,7 +1211,7 @@
                 filtered = filtered.filter(item => item.toLowerCase().includes(cleanQuery));
             }
             
-            filtered = filtered.slice(0, 8);
+            // Sin límites de recorte para mostrar la lista de diagnóstico completa
             
             if (filtered.length === 0) {
                 if (allowedDxCodes) {
